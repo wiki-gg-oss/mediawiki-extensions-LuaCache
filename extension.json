@@ -1,0 +1,29 @@
+{
+	"name": "LuaCache",
+	"version": "1.0.0",
+	"author": [
+		"Robert Nix"
+	],
+	"url": "https://github.com/HydraWiki/LuaCache",
+	"descriptionmsg": "luacache-desc",
+	"license-name": "MIT",
+	"type": "parserhook",
+	"requires": {
+		"MediaWiki": ">= 1.29.0"
+	},
+	"MessagesDirs": {
+		"LuaCache": [
+			"i18n"
+		]
+	},
+	"AutoloadClasses": {
+		"LuaCache\\Hooks": "LuaCache.hooks.php",
+		"LuaCache\\LuaCacheLibrary": "LuaCache.lua.php"
+	},
+	"Hooks": {
+		"ScribuntoExternalLibraries": [
+			"LuaCache\\Hooks::onScribuntoExternalLibraries"
+		]
+	},
+	"manifest_version": 1
+}

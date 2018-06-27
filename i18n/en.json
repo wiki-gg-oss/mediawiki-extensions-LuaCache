@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robert Nix"
+		]
+	},
+	"luacache-desc": "Scribunto Lua interface for MediaWiki's Object Cache"
+}
