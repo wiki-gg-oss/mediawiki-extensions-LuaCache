@@ -4,7 +4,7 @@
 	"author": [
 		"Robert Nix"
 	],
-	"url": "https://github.com/HydraWiki/LuaCache",
+	"url": "https://gitlab.com/HydraWiki/extensions/LuaCache",
 	"descriptionmsg": "luacache-desc",
 	"license-name": "MIT",
 	"type": "parserhook",
