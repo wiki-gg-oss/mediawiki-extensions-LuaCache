@@ -12,9 +12,10 @@
 
 namespace LuaCache;
 
-use \MediaWiki\MediaWikiServices;
+use MediaWiki\Extension\Scribunto\Engines\LuaCommon\LibraryBase;
+use MediaWiki\MediaWikiServices;
 
-class LuaCacheLibrary extends \Scribunto_LuaLibraryBase {
+class LuaCacheLibrary extends LibraryBase {
 	/**
 	 * Register the Lua extension with Scribunto
 	 *
@@ -22,14 +23,16 @@ class LuaCacheLibrary extends \Scribunto_LuaLibraryBase {
 	 * @return array Lua package
 	 */
 	public function register() {
+		$luaPath = __DIR__ . '/../lua';
+
 		// Register the binser package dependency
 		$this->getEngine()->registerInterface(
-			__DIR__ . '/binser.lua', []
+			"$luaPath/binser.lua", []
 		);
 
 		// Register the LuaCache package
 		return $this->getEngine()->registerInterface(
-			__DIR__ . '/mw.ext.LuaCache.lua', [
+			"$luaPath/mw.ext.LuaCache.lua", [
 				'get'      => [$this, 'get'],
 				'set'      => [$this, 'set'],
 				'getMulti' => [$this, 'getMulti'],

@@ -9,21 +9,23 @@
 	"license-name": "MIT",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.29.0"
+		"MediaWiki": ">= 1.35.0",
+		"extensions": {
+			"Scribunto": "*"
+		}
 	},
 	"MessagesDirs": {
 		"LuaCache": [
 			"i18n"
 		]
 	},
-	"AutoloadClasses": {
-		"LuaCache\\Hooks": "LuaCache.hooks.php",
-		"LuaCache\\LuaCacheLibrary": "LuaCache.lua.php"
+	"AutoloadNamespaces": {
+		"LuaCache": "src/"
 	},
 	"Hooks": {
 		"ScribuntoExternalLibraries": [
-			"LuaCache\\Hooks::onScribuntoExternalLibraries"
+			"LuaCache\\ScribuntoHooks::onScribuntoExternalLibraries"
 		]
 	},
-	"manifest_version": 1
+	"manifest_version": 2
 }

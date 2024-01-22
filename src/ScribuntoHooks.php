@@ -12,7 +12,7 @@
 
 namespace LuaCache;
 
-class Hooks {
+class ScribuntoHooks {
 	/**
 	 * Hook to register the LuaCache Lua library
 	 *
@@ -21,7 +21,7 @@ class Hooks {
 	 * @param  array &$extraLibraries Libraries to add
 	 * @return bool
 	 */
-	public static function onScribuntoExternalLibraries( $engine, array &$extraLibraries ) {
+	public static function onScribuntoExternalLibraries( string $engine, array &$extraLibraries ) {
 		if ( $engine === 'lua' ) {
 			$extraLibraries['mw.ext.LuaCache'] = 'LuaCache\\LuaCacheLibrary';
 		}
