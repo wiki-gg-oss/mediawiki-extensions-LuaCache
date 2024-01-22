@@ -10,7 +10,7 @@
  *
 **/
 
-namespace LuaCache;
+namespace MediaWiki\Extension\LuaCache;
 
 use MediaWiki\Extension\Scribunto\Engines\LuaCommon\LibraryBase;
 use MediaWiki\MediaWikiServices;

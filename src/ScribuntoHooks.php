@@ -10,7 +10,7 @@
  *
 **/
 
-namespace LuaCache;
+namespace MediaWiki\Extension\LuaCache;
 
 class ScribuntoHooks {
 	/**

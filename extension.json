@@ -20,11 +20,11 @@
 		]
 	},
 	"AutoloadNamespaces": {
-		"LuaCache": "src/"
+		"MediaWiki\\Extension\\LuaCache": "src/"
 	},
 	"Hooks": {
 		"ScribuntoExternalLibraries": [
-			"LuaCache\\ScribuntoHooks::onScribuntoExternalLibraries"
+			"MediaWiki\\Extension\\LuaCache\\ScribuntoHooks::onScribuntoExternalLibraries"
 		]
 	},
 	"manifest_version": 2
