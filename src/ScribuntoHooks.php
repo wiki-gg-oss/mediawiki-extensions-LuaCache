@@ -12,7 +12,10 @@
 
 namespace MediaWiki\Extension\LuaCache;
 
-class ScribuntoHooks {
+class ScribuntoHooks implements
+	\MediaWiki\Extension\Scribunto\Hooks\ScribuntoExternalLibrariesHook
+{
+
 	/**
 	 * Hook to register the LuaCache Lua library
 	 *
@@ -21,7 +24,7 @@ class ScribuntoHooks {
 	 * @param  array &$extraLibraries Libraries to add
 	 * @return bool
 	 */
-	public static function onScribuntoExternalLibraries( string $engine, array &$extraLibraries ) {
+	public function onScribuntoExternalLibraries( string $engine, array &$extraLibraries ) {
 		if ( $engine === 'lua' ) {
 			$extraLibraries['mw.ext.LuaCache'] = LuaCacheLibrary::class;
 		}
