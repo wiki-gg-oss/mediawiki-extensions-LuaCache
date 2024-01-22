@@ -12,10 +12,21 @@
 
 namespace MediaWiki\Extension\LuaCache;
 
+use BagOStuff;
 use MediaWiki\Extension\Scribunto\Engines\LuaCommon\LibraryBase;
+use MediaWiki\Extension\Scribunto\Engines\LuaCommon\LuaEngine;
+use MediaWiki\Extension\Scribunto\Engines\LuaCommon\LuaError;
 use MediaWiki\MediaWikiServices;
 
 class LuaCacheLibrary extends LibraryBase {
+	private BagOStuff $cache;
+
+	public function __construct( LuaEngine $engine ) {
+		parent::__construct( $engine );
+
+		$this->cache = MediaWikiServices::getInstance()->getMainObjectStash();
+	}
+
 	/**
 	 * Register the Lua extension with Scribunto
 	 *
@@ -52,9 +63,8 @@ class LuaCacheLibrary extends LibraryBase {
 	public function get( $key ) {
 		$this->checkType( 'get', 1, $key, 'string' );
 
-		$cache = MediaWikiServices::getInstance()->getMainObjectStash();
-		$cacheKey = $cache->makeKey( 'LuaCache', $key );
-		return [ $cache->get( $cacheKey ) ];
+		$cacheKey = $this->cache->makeKey( 'LuaCache', $key );
+		return [ $this->cache->get( $cacheKey ) ];
 	}
 
 	/**
@@ -71,9 +81,8 @@ class LuaCacheLibrary extends LibraryBase {
 		$this->checkType( 'set', 2, $value, 'string' );
 		$this->checkTypeOptional( 'set', 3, $exptime, 'number', 0 );
 
-		$cache = MediaWikiServices::getInstance()->getMainObjectStash();
-		$cacheKey = $cache->makeKey( 'LuaCache', $key );
-		return [ $cache->set( $cacheKey, $value, $exptime ) ];
+		$cacheKey = $this->cache->makeKey( 'LuaCache', $key );
+		return [ $this->cache->set( $cacheKey, $value, $exptime ) ];
 	}
 
 	/**
@@ -86,7 +95,6 @@ class LuaCacheLibrary extends LibraryBase {
 	public function getMulti( $keys ) {
 		$this->checkType( 'getMulti', 1, $keys, 'table' );
 
-		$cache = MediaWikiServices::getInstance()->getMainObjectStash();
 		$cacheKeys = [];
 		$cacheKeyToKey = [];
 		foreach ( $keys as $key ) {
@@ -97,11 +105,11 @@ class LuaCacheLibrary extends LibraryBase {
 				);
 			}
 
-			$cacheKey = $cache->makeKey( 'LuaCache', $key );
+			$cacheKey = $this->cache->makeKey( 'LuaCache', $key );
 			$cacheKeys[] = $cacheKey;
 			$cacheKeyToKey[$cacheKey] = $key;
 		}
-		$cacheData = $cache->getMulti( $cacheKeys );
+		$cacheData = $this->cache->getMulti( $cacheKeys );
 
 		// Rename the keys to match what was passed in
 		$data = [];
@@ -126,26 +134,25 @@ class LuaCacheLibrary extends LibraryBase {
 		$this->checkType( 'setMulti', 1, $data, 'table' );
 		$this->checkTypeOptional( 'setMulti', 2, $exptime, 'number', 0 );
 
-		$cache = MediaWikiServices::getInstance()->getMainObjectStash();
 		$cacheData = [];
 		foreach ( $data as $key => $value ) {
 			$keyType = $this->getLuaType( $key );
 			if ( $keyType !== 'string' ) {
-				throw new Scribunto_LuaError(
+				throw new LuaError(
 					"bad argument 1 to setMulti (string expected for table key, get $keyType)"
 				);
 			}
 			$valueType = $this->getLuaType( $value );
 			if ( $valueType !== 'string' ) {
-				throw new Scribunto_LuaError(
+				throw new LuaError(
 					"bad argument 1 to setMulti (string expected for table value, get $valueType)"
 				);
 			}
 
-			$cacheKey = $cache->makeKey( 'LuaCache', $key );
+			$cacheKey = $this->cache->makeKey( 'LuaCache', $key );
 			$cacheData[$cacheKey] = $value;
 		}
-		return [ $cache->setMulti( $cacheData, $exptime ) ];
+		return [ $this->cache->setMulti( $cacheData, $exptime ) ];
 	}
 
 	/**
@@ -158,8 +165,7 @@ class LuaCacheLibrary extends LibraryBase {
 	public function delete( $key ) {
 		$this->checkType( 'delete', 1, $key, 'string' );
 
-		$cache = MediaWikiServices::getInstance()->getMainObjectStash();
-		$cacheKey = $cache->makeKey( 'LuaCache', $key );
-		return [ $cache->delete( $cacheKey ) ];
+		$cacheKey = $this->cache->makeKey( 'LuaCache', $key );
+		return [ $this->cache->delete( $cacheKey ) ];
 	}
 }
