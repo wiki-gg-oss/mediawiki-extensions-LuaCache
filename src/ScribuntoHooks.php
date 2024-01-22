@@ -23,7 +23,7 @@ class ScribuntoHooks {
 	 */
 	public static function onScribuntoExternalLibraries( string $engine, array &$extraLibraries ) {
 		if ( $engine === 'lua' ) {
-			$extraLibraries['mw.ext.LuaCache'] = 'LuaCache\\LuaCacheLibrary';
+			$extraLibraries['mw.ext.LuaCache'] = LuaCacheLibrary::class;
 		}
 		return true;
 	}
