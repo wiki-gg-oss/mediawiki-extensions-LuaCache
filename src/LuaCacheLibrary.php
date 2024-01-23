@@ -19,12 +19,12 @@ use MediaWiki\Extension\Scribunto\Engines\LuaCommon\LuaError;
 use MediaWiki\MediaWikiServices;
 
 class LuaCacheLibrary extends LibraryBase {
-	private BagOStuff $cache;
+	private BagOStuff $primaryCache;
 
 	public function __construct( LuaEngine $engine ) {
 		parent::__construct( $engine );
 
-		$this->cache = MediaWikiServices::getInstance()->getMainObjectStash();
+		$this->primaryCache = MediaWikiServices::getInstance()->getMainObjectStash();
 	}
 
 	/**
@@ -54,6 +54,16 @@ class LuaCacheLibrary extends LibraryBase {
 	}
 
 	/**
+	 * Make a cache key in LuaCache's keyspace for given components
+	 *
+	 * @param string|int ...$components Ordered, key components for entity IDs
+	 * @return string
+	 */
+	private function makeKey( ...$components ) {
+		return $this->primaryCache->makeKey( 'LuaCache', ...$components );
+	}
+
+	/**
 	 * Get an item from the main object cache
 	 *
 	 * @access public
@@ -63,8 +73,8 @@ class LuaCacheLibrary extends LibraryBase {
 	public function get( $key ) {
 		$this->checkType( 'get', 1, $key, 'string' );
 
-		$cacheKey = $this->cache->makeKey( 'LuaCache', $key );
-		return [ $this->cache->get( $cacheKey ) ];
+		$cacheKey = $this->makeKey( 'LuaCache', $key );
+		return [ $this->primaryCache->get( $cacheKey ) ];
 	}
 
 	/**
@@ -81,8 +91,8 @@ class LuaCacheLibrary extends LibraryBase {
 		$this->checkType( 'set', 2, $value, 'string' );
 		$this->checkTypeOptional( 'set', 3, $exptime, 'number', 0 );
 
-		$cacheKey = $this->cache->makeKey( 'LuaCache', $key );
-		return [ $this->cache->set( $cacheKey, $value, $exptime ) ];
+		$cacheKey = $this->makeKey( 'LuaCache', $key );
+		return [ $this->primaryCache->set( $cacheKey, $value, $exptime ) ];
 	}
 
 	/**
@@ -105,11 +115,11 @@ class LuaCacheLibrary extends LibraryBase {
 				);
 			}
 
-			$cacheKey = $this->cache->makeKey( 'LuaCache', $key );
+			$cacheKey = $this->makeKey( 'LuaCache', $key );
 			$cacheKeys[] = $cacheKey;
 			$cacheKeyToKey[$cacheKey] = $key;
 		}
-		$cacheData = $this->cache->getMulti( $cacheKeys );
+		$cacheData = $this->primaryCache->getMulti( $cacheKeys );
 
 		// Rename the keys to match what was passed in
 		$data = [];
@@ -149,10 +159,10 @@ class LuaCacheLibrary extends LibraryBase {
 				);
 			}
 
-			$cacheKey = $this->cache->makeKey( 'LuaCache', $key );
+			$cacheKey = $this->makeKey( 'LuaCache', $key );
 			$cacheData[$cacheKey] = $value;
 		}
-		return [ $this->cache->setMulti( $cacheData, $exptime ) ];
+		return [ $this->primaryCache->setMulti( $cacheData, $exptime ) ];
 	}
 
 	/**
@@ -165,7 +175,7 @@ class LuaCacheLibrary extends LibraryBase {
 	public function delete( $key ) {
 		$this->checkType( 'delete', 1, $key, 'string' );
 
-		$cacheKey = $this->cache->makeKey( 'LuaCache', $key );
-		return [ $this->cache->delete( $cacheKey ) ];
+		$cacheKey = $this->makeKey( 'LuaCache', $key );
+		return [ $this->primaryCache->delete( $cacheKey ) ];
 	}
 }
