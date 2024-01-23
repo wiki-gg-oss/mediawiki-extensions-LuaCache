@@ -110,7 +110,7 @@ class LuaCacheLibrary extends LibraryBase {
 		foreach ( $keys as $key ) {
 			$keyType = $this->getLuaType( $key );
 			if ( $keyType !== 'string' ) {
-				throw new Scribunto_LuaError(
+				throw new LuaError(
 					"bad argument 1 to getMulti (string expected for table key, get $keyType)"
 				);
 			}
@@ -166,7 +166,7 @@ class LuaCacheLibrary extends LibraryBase {
 	}
 
 	/**
-	 * Set multiple items in the main object cache
+	 * Deletes an item in the main object cache
 	 *
 	 * @access public
 	 * @param  string $key Name of the item to delete
