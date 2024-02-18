@@ -4,5 +4,6 @@
 			"Robert Nix"
 		]
 	},
-	"luacache-desc": "Scribunto Lua interface for MediaWiki's Object Cache"
+	"luacache-desc": "Scribunto Lua interface for MediaWiki's Object Cache",
+	"right-luacachecanexpand": "Modify LuaCache for the entire wiki through MediaWiki API"
 }

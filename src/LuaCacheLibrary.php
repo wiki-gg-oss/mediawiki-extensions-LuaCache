@@ -13,18 +13,68 @@
 namespace MediaWiki\Extension\LuaCache;
 
 use BagOStuff;
+use HashBagOStuff;
 use MediaWiki\Extension\Scribunto\Engines\LuaCommon\LibraryBase;
 use MediaWiki\Extension\Scribunto\Engines\LuaCommon\LuaEngine;
 use MediaWiki\Extension\Scribunto\Engines\LuaCommon\LuaError;
 use MediaWiki\MediaWikiServices;
+use RequestContext;
 
 class LuaCacheLibrary extends LibraryBase {
+	/**
+	 * LuaCache operations invoked in these API actions will be shielded with an in-process cache on writes to prevent
+	 * rogue actors from poisoning any site-wide cache entries. This list can be bypassed with the `luacachecanexpand`
+	 * right.
+	 *
+	 * Of course, since this is hand-picked this isn't perfect...
+	 *
+	 * @var string[]
+	 */
+	private const PROTECTED_ACTIONS = [
+		// Scribunto's interactive Lua console
+		'scribunto-console',
+		// The following can be spammed with rogue data:
+		'expandtemplates',
+		'parse',
+	];
+
 	private BagOStuff $primaryCache;
+	private ?HashBagOStuff $memoryCache = null;
 
 	public function __construct( LuaEngine $engine ) {
 		parent::__construct( $engine );
-
 		$this->primaryCache = MediaWikiServices::getInstance()->getMainObjectStash();
+
+		if ( $this->checkActionSafeguards() ) {
+			$this->memoryCache = new HashBagOStuff();
+		}
+	}
+
+	/**
+	 * Check if a fake in-memory store should be used for LuaCache operations.
+	 *
+	 * This returns true if current 'action' request parameter is listed in the PROTECTED_ACTIONS constant, and:
+	 * - The 'lcwritable' parameter is truey and the user has the 'luacachecanexpand' right,
+	 * - or the API module being reached is Scribunto console and the user has the 'luacacheconsole' right.
+	 *
+	 * @return bool
+	 */
+	private function checkActionSafeguards(): bool {
+		$reqContext = RequestContext::getMain();
+		$request = $reqContext->getRequest();
+
+		$action = strtolower( $request->getRawVal( 'action', '' ) );
+
+		if ( !in_array( $action, self::PROTECTED_ACTIONS ) ) {
+			return false;
+		}
+
+		$right = $action === 'scribunto-console' ? 'luacacheconsole' : 'luacachecanexpand';
+		if ( $right === 'luacachecanexpand' && $request->getBool( 'lcwritable', false ) ) {
+			$right = false;
+		}
+
+		return $right === false || !$reqContext->getAuthority()->isAllowed( $right );
 	}
 
 	/**
@@ -74,7 +124,13 @@ class LuaCacheLibrary extends LibraryBase {
 		$this->checkType( 'get', 1, $key, 'string' );
 
 		$cacheKey = $this->makeKey( 'LuaCache', $key );
-		return [ $this->primaryCache->get( $cacheKey ) ];
+
+		$cache = $this->primaryCache;
+		if ( $this->memoryCache && $this->memoryCache->hasKey( $cacheKey ) ) {
+			$cache = $this->memoryCache;
+		}
+
+		return [ $cache->get( $cacheKey ) ];
 	}
 
 	/**
@@ -92,7 +148,8 @@ class LuaCacheLibrary extends LibraryBase {
 		$this->checkTypeOptional( 'set', 3, $exptime, 'number', 0 );
 
 		$cacheKey = $this->makeKey( 'LuaCache', $key );
-		return [ $this->primaryCache->set( $cacheKey, $value, $exptime ) ];
+		$cache = $this->memoryCache ?? $this->primaryCache;
+		return [ $cache->set( $cacheKey, $value, $exptime ) ];
 	}
 
 	/**
@@ -119,7 +176,12 @@ class LuaCacheLibrary extends LibraryBase {
 			$cacheKeys[] = $cacheKey;
 			$cacheKeyToKey[$cacheKey] = $key;
 		}
+
+		// Read from primary first, then if untrusted append primary's data onto the process cache
 		$cacheData = $this->primaryCache->getMulti( $cacheKeys );
+		if ( $this->memoryCache ) {
+			$cacheData = $this->memoryCache->getMulti( $cacheKeys ) + $cacheData;
+		}
 
 		// Rename the keys to match what was passed in
 		$data = [];
@@ -162,7 +224,9 @@ class LuaCacheLibrary extends LibraryBase {
 			$cacheKey = $this->makeKey( 'LuaCache', $key );
 			$cacheData[$cacheKey] = $value;
 		}
-		return [ $this->primaryCache->setMulti( $cacheData, $exptime ) ];
+
+		$cache = $this->memoryCache ?? $this->primaryCache;
+		return [ $cache->setMulti( $cacheData, $exptime ) ];
 	}
 
 	/**
@@ -176,6 +240,7 @@ class LuaCacheLibrary extends LibraryBase {
 		$this->checkType( 'delete', 1, $key, 'string' );
 
 		$cacheKey = $this->makeKey( 'LuaCache', $key );
-		return [ $this->primaryCache->delete( $cacheKey ) ];
+		$cache = $this->memoryCache ?? $this->primaryCache;
+		return [ $cache->delete( $cacheKey ) ];
 	}
 }

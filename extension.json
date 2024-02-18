@@ -14,6 +14,18 @@
 			"Scribunto": "*"
 		}
 	},
+	"AvailableRights": [
+		"luacachecanexpand",
+		"luacacheconsole"
+	],
+	"GroupPermissions": {
+		"user": {
+			"luacachecanexpand": true
+		},
+		"sysop": {
+			"luacacheconsole": true
+		}
+	},
 	"MessagesDirs": {
 		"LuaCache": [
 			"i18n"
