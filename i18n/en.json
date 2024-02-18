@@ -1,9 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"Robert Nix"
+			"Robert Nix",
+			"alex4401"
 		]
 	},
 	"luacache-desc": "Scribunto Lua interface for MediaWiki's Object Cache",
-	"right-luacachecanexpand": "Modify LuaCache for the entire wiki through MediaWiki API"
+	"right-luacachecanexpand": "Modify LuaCache for the entire wiki through MediaWiki API",
+	"luacache-logpage": "LuaCache API write log",
+	"luacache-logpagetext": "This is a log of all LuaCache writes that were executed by users through the MediaWiki API.",
+	"luacache-logentry-apiwrite": "modified object cache through the API on $1"
 }

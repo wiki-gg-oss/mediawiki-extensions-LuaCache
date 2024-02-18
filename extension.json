@@ -26,6 +26,19 @@
 			"luacacheconsole": true
 		}
 	},
+	"LogTypes": [
+		"luacache"
+	],
+	"LogNames": {
+		"luacache": "luacache-logpage"
+	},
+	"LogHeaders": {
+		"luacache": "luacache-logpagetext"
+	},
+	"LogActions": {
+		"luacache/consolewrite": "luacache-logentry-consolewrite",
+		"luacache/apiwrite": "luacache-logentry-apiwrite"
+	},
 	"MessagesDirs": {
 		"LuaCache": [
 			"i18n"

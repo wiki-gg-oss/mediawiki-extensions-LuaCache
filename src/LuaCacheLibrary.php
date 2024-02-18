@@ -14,11 +14,13 @@ namespace MediaWiki\Extension\LuaCache;
 
 use BagOStuff;
 use HashBagOStuff;
+use ManualLogEntry;
 use MediaWiki\Extension\Scribunto\Engines\LuaCommon\LibraryBase;
 use MediaWiki\Extension\Scribunto\Engines\LuaCommon\LuaEngine;
 use MediaWiki\Extension\Scribunto\Engines\LuaCommon\LuaError;
 use MediaWiki\MediaWikiServices;
 use RequestContext;
+use WebRequest;
 
 class LuaCacheLibrary extends LibraryBase {
 	/**
@@ -40,6 +42,7 @@ class LuaCacheLibrary extends LibraryBase {
 
 	private BagOStuff $primaryCache;
 	private ?HashBagOStuff $memoryCache = null;
+	private ?array $logParams = null;
 
 	public function __construct( LuaEngine $engine ) {
 		parent::__construct( $engine );
@@ -64,17 +67,45 @@ class LuaCacheLibrary extends LibraryBase {
 		$request = $reqContext->getRequest();
 
 		$action = strtolower( $request->getRawVal( 'action', '' ) );
-
 		if ( !in_array( $action, self::PROTECTED_ACTIONS ) ) {
 			return false;
 		}
 
-		$right = $action === 'scribunto-console' ? 'luacacheconsole' : 'luacachecanexpand';
-		if ( $right === 'luacachecanexpand' && $request->getBool( 'lcwritable', false ) ) {
-			$right = false;
+		$right = $this->getSafeguardBypassRight( $request, $action );
+		if ( $right !== false && $reqContext->getAuthority()->isAllowed( $right ) ) {
+			$this->logParams = [
+				'action' => $action === 'scribunto-console' ? 'consolewrite' : 'apiwrite',
+				'identity' => $reqContext->getUser(),
+			];
+			return false;
 		}
 
-		return $right === false || !$reqContext->getAuthority()->isAllowed( $right );
+		return true;
+	}
+
+	/**
+	 * @return false|string
+	 */
+	private function getSafeguardBypassRight( WebRequest $request, string $action ) {
+		if ( $action === 'scribunto-console' ) {
+			return 'luacacheconsole';
+		}
+		return $request->getBool( 'lcwritable', false ) ? 'luacachecanexpand' : false;
+	}
+	
+	private function logWriteIfNeeded(): void {
+		if ( !$this->logParams ) {
+			return;
+		}
+
+        $logEntry = new ManualLogEntry( 'luacache', $this->logParams['action'] );
+        $logEntry->setPerformer( $this->logParams['identity'] );
+		$logEntry->setTarget( $this->getTitle() );
+
+        $logId = $logEntry->insert();
+        $logEntry->publish( $logId );
+
+		$this->logParams = null;
 	}
 
 	/**
@@ -149,6 +180,7 @@ class LuaCacheLibrary extends LibraryBase {
 
 		$cacheKey = $this->makeKey( 'LuaCache', $key );
 		$cache = $this->memoryCache ?? $this->primaryCache;
+		$this->logWriteIfNeeded();
 		return [ $cache->set( $cacheKey, $value, $exptime ) ];
 	}
 
@@ -226,6 +258,7 @@ class LuaCacheLibrary extends LibraryBase {
 		}
 
 		$cache = $this->memoryCache ?? $this->primaryCache;
+		$this->logWriteIfNeeded();
 		return [ $cache->setMulti( $cacheData, $exptime ) ];
 	}
 
@@ -241,6 +274,7 @@ class LuaCacheLibrary extends LibraryBase {
 
 		$cacheKey = $this->makeKey( 'LuaCache', $key );
 		$cache = $this->memoryCache ?? $this->primaryCache;
+		$this->logWriteIfNeeded();
 		return [ $cache->delete( $cacheKey ) ];
 	}
 }
