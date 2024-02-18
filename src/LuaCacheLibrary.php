@@ -72,7 +72,7 @@ class LuaCacheLibrary extends LibraryBase {
 	/**
 	 * Check if LuaCache should be isolated in current request context.
 	 *
-	 * @return bool
+	 * @return bool `true` for isolation, `false` for full access.
 	 */
 	private function checkActionSafeguards(): bool {
 		$lcLogApiWrites = MediaWikiServices::getInstance()->getMainConfig()->get( 'LuaCacheEnableApiLogs' );
