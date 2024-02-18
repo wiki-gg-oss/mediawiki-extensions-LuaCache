@@ -55,10 +55,10 @@
 		"ScribuntoExternalLibraries": "ScribuntoHooks"
 	},
 	"config": {
-		"LuaCacheLogApiWrites": {
+		"LuaCacheEnableApiLogs": {
 			"value": true
 		},
-		"LuaCacheLogApiWritesToRCs": {
+		"LuaCacheHideApiLogs": {
 			"value": false
 		}
 	},

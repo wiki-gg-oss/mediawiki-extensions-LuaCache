@@ -68,7 +68,7 @@ class LuaCacheLibrary extends LibraryBase {
 	 * @return bool
 	 */
 	private function checkActionSafeguards(): bool {
-		$lcLogApiWrites = MediaWikiServices::getInstance()->getMainConfig()->get( 'LuaCacheLogApiWrites' );
+		$lcLogApiWrites = MediaWikiServices::getInstance()->getMainConfig()->get( 'LuaCacheEnableApiLogs' );
 
 		$reqContext = RequestContext::getMain();
 		$request = $reqContext->getRequest();
