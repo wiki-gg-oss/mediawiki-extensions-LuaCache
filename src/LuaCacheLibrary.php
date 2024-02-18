@@ -33,11 +33,20 @@ class LuaCacheLibrary extends LibraryBase {
 	 * @var string[]
 	 */
 	private const PROTECTED_ACTIONS = [
-		// Scribunto's interactive Lua console
-		'scribunto-console',
 		// The following can be spammed with rogue data:
 		'expandtemplates',
 		'parse',
+	];
+
+	/**
+	 * Operations executed within these API calls will always be isolated.
+	 *
+	 * @var string[]
+	 */
+	private const UNWRITABLE_ACTIONS = [
+		// Scribunto's interactive Lua console - there's no way to persist state between requests, and the console
+		// reevaluates all calls every request. Don't allow disabling isolation to allow log spam.
+		'scribunto-console',
 	];
 
 	private BagOStuff $primaryCache;
@@ -54,11 +63,7 @@ class LuaCacheLibrary extends LibraryBase {
 	}
 
 	/**
-	 * Check if a fake in-memory store should be used for LuaCache operations.
-	 *
-	 * This returns true if current 'action' request parameter is listed in the PROTECTED_ACTIONS constant, and:
-	 * - The 'lcwritable' parameter is truey and the user has the 'luacachecanexpand' right,
-	 * - or the API module being reached is Scribunto console and the user has the 'luacacheconsole' right.
+	 * Check if LuaCache should be isolated in current request context.
 	 *
 	 * @return bool
 	 */
@@ -67,30 +72,27 @@ class LuaCacheLibrary extends LibraryBase {
 		$request = $reqContext->getRequest();
 
 		$action = strtolower( $request->getRawVal( 'action', '' ) );
+
+		// Check if always isolated
+		if ( in_array( $action, self::UNWRITABLE_ACTIONS ) ) {
+			return true;
+		}
+		// Check if isolation can be bypassed
 		if ( !in_array( $action, self::PROTECTED_ACTIONS ) ) {
 			return false;
 		}
 
-		$right = $this->getSafeguardBypassRight( $request, $action );
+		// Check if user requested an isolation bypass
+		$right = $request->getBool( 'lcwritable', false ) ? 'luacachecanexpand' : false;
 		if ( $right !== false && $reqContext->getAuthority()->isAllowed( $right ) ) {
 			$this->logParams = [
-				'action' => $action === 'scribunto-console' ? 'consolewrite' : 'apiwrite',
+				'action' => 'apiwrite',
 				'identity' => $reqContext->getUser(),
 			];
 			return false;
 		}
 
 		return true;
-	}
-
-	/**
-	 * @return false|string
-	 */
-	private function getSafeguardBypassRight( WebRequest $request, string $action ) {
-		if ( $action === 'scribunto-console' ) {
-			return 'luacacheconsole';
-		}
-		return $request->getBool( 'lcwritable', false ) ? 'luacachecanexpand' : false;
 	}
 	
 	private function logWriteIfNeeded(): void {

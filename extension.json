@@ -15,15 +15,11 @@
 		}
 	},
 	"AvailableRights": [
-		"luacachecanexpand",
-		"luacacheconsole"
+		"luacachecanexpand"
 	],
 	"GroupPermissions": {
 		"user": {
 			"luacachecanexpand": true
-		},
-		"sysop": {
-			"luacacheconsole": true
 		}
 	},
 	"LogTypes": [
@@ -36,7 +32,6 @@
 		"luacache": "luacache-logpagetext"
 	},
 	"LogActions": {
-		"luacache/consolewrite": "luacache-logentry-consolewrite",
 		"luacache/apiwrite": "luacache-logentry-apiwrite"
 	},
 	"MessagesDirs": {
