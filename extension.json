@@ -57,6 +57,9 @@
 	"config": {
 		"LuaCacheLogApiWrites": {
 			"value": true
+		},
+		"LuaCacheLogApiWritesToRCs": {
+			"value": false
 		}
 	},
 	"manifest_version": 2

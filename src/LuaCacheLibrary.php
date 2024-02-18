@@ -114,7 +114,11 @@ class LuaCacheLibrary extends LibraryBase {
 		$logEntry->setTarget( $this->getTitle() );
 
         $logId = $logEntry->insert();
-        $logEntry->publish( $logId );
+
+		$lcLogApiWritesToRCs = MediaWikiServices::getInstance()->getMainConfig()->get( 'LuaCacheLogApiWritesToRCs' );
+		if ( $lcLogApiWritesToRCs ) {
+			$logEntry->publish( $logId );
+		}
 
 		$this->logParams = null;
 	}
