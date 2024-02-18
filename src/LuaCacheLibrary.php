@@ -68,6 +68,8 @@ class LuaCacheLibrary extends LibraryBase {
 	 * @return bool
 	 */
 	private function checkActionSafeguards(): bool {
+		$lcLogApiWrites = MediaWikiServices::getInstance()->getMainConfig()->get( 'LuaCacheLogApiWrites' );
+
 		$reqContext = RequestContext::getMain();
 		$request = $reqContext->getRequest();
 
@@ -85,10 +87,13 @@ class LuaCacheLibrary extends LibraryBase {
 		// Check if user requested an isolation bypass
 		$right = $request->getBool( 'lcwritable', false ) ? 'luacachecanexpand' : false;
 		if ( $right !== false && $reqContext->getAuthority()->isAllowed( $right ) ) {
-			$this->logParams = [
-				'action' => 'apiwrite',
-				'identity' => $reqContext->getUser(),
-			];
+			if ( $lcLogApiWrites ) {
+				// Prepare info for the log entry that'll be created on the first write action
+				$this->logParams = [
+					'action' => 'apiwrite',
+					'identity' => $reqContext->getUser(),
+				];
+			}
 			return false;
 		}
 

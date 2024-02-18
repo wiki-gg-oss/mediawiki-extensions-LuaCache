@@ -50,5 +50,10 @@
 	"Hooks": {
 		"ScribuntoExternalLibraries": "ScribuntoHooks"
 	},
+	"config": {
+		"LuaCacheLogApiWrites": {
+			"value": true
+		}
+	},
 	"manifest_version": 2
 }
