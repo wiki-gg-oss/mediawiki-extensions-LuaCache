@@ -96,7 +96,7 @@ class LuaCacheLibrary extends LibraryBase {
 
 		// Force isolation if the title does not exist
 		if ( !$this->getTitle()->exists() ) {
-			return false;
+			return true;
 		}
 
 		// Check if user requested an isolation bypass
