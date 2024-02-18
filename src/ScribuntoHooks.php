@@ -12,9 +12,7 @@
 
 namespace MediaWiki\Extension\LuaCache;
 
-class ScribuntoHooks implements
-	\MediaWiki\Extension\Scribunto\Hooks\ScribuntoExternalLibrariesHook
-{
+class ScribuntoHooks {
 
 	/**
 	 * Hook to register the LuaCache Lua library
