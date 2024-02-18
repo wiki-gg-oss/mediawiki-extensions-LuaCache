@@ -43,11 +43,15 @@
 		"MediaWiki\\Extension\\LuaCache\\": "src/"
 	},
 	"HookHandlers": {
+		"ApiHooks": {
+			"class": "MediaWiki\\Extension\\LuaCache\\ApiHooks"
+		},
 		"ScribuntoHooks": {
 			"class": "MediaWiki\\Extension\\LuaCache\\ScribuntoHooks"
 		}
 	},
 	"Hooks": {
+		"APIGetAllowedParams": "ApiHooks",
 		"ScribuntoExternalLibraries": "ScribuntoHooks"
 	},
 	"config": {

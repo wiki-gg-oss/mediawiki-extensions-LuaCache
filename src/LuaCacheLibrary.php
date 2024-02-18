@@ -32,7 +32,7 @@ class LuaCacheLibrary extends LibraryBase {
 	 *
 	 * @var string[]
 	 */
-	private const PROTECTED_ACTIONS = [
+	public const PROTECTED_ACTIONS = [
 		// The following can be spammed with rogue data:
 		'expandtemplates',
 		'parse',
@@ -43,7 +43,7 @@ class LuaCacheLibrary extends LibraryBase {
 	 *
 	 * @var string[]
 	 */
-	private const UNWRITABLE_ACTIONS = [
+	public const UNWRITABLE_ACTIONS = [
 		// Scribunto's interactive Lua console - there's no way to persist state between requests, and the console
 		// reevaluates all calls every request. Don't allow disabling isolation to allow log spam.
 		'scribunto-console',
