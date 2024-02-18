@@ -20,7 +20,7 @@ class ApiHooks implements
 {
 
 	/**
-     * Adds the `lcwritable` parameter where applicable.
+     * Adds the `luacachewrite` parameter where applicable.
      *
 	 * @param ApiBase $module
 	 * @param array &$params Array of parameters
@@ -29,11 +29,11 @@ class ApiHooks implements
 	 */
 	public function onAPIGetAllowedParams( $module, &$params, $flags ) {
         if ( in_array( $module->getModuleName(), LuaCacheLibrary::PROTECTED_ACTIONS ) ) {
-            $params['lcwritable'] = [
+            $params[LuaCacheLibrary::WRITABLE_API_PARAM_NAME] = [
 				ParamValidator::PARAM_TYPE => 'boolean',
 				ParamValidator::PARAM_REQUIRED => false,
 				ApiBase::PARAM_HELP_MSG => [
-					'luacache-api-help-param-lcwritable',
+					'luacache-api-help-param-luacachewrite',
 				],
 			];
         }

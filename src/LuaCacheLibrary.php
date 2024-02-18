@@ -49,6 +49,13 @@ class LuaCacheLibrary extends LibraryBase {
 		'scribunto-console',
 	];
 
+	/**
+	 * Name of the parameter that can be set to disable isolation.
+	 *
+	 * @var string
+	 */
+	public const WRITABLE_API_PARAM_NAME = 'luacachewrite';
+
 	private BagOStuff $primaryCache;
 	private ?HashBagOStuff $memoryCache = null;
 	private ?array $logParams = null;
@@ -89,7 +96,7 @@ class LuaCacheLibrary extends LibraryBase {
 		}
 
 		// Check if user requested an isolation bypass
-		$right = $request->getBool( 'lcwritable', false ) ? 'luacachecanexpand' : false;
+		$right = $request->getBool( self::WRITABLE_API_PARAM_NAME, false ) ? 'luacachecanexpand' : false;
 		if ( $right !== false && $reqContext->getAuthority()->isAllowed( $right ) ) {
 			if ( $lcLogApiWrites ) {
 				// Prepare info for the log entry that'll be created on the first write action
@@ -115,7 +122,7 @@ class LuaCacheLibrary extends LibraryBase {
 
         $logId = $logEntry->insert();
 
-		$lcLogApiWritesToRCs = MediaWikiServices::getInstance()->getMainConfig()->get( 'LuaCacheLogApiWritesToRCs' );
+		$lcLogApiWritesToRCs = MediaWikiServices::getInstance()->getMainConfig()->get( 'LuaCacheHideApiLogs' );
 		if ( $lcLogApiWritesToRCs ) {
 			$logEntry->publish( $logId );
 		}
