@@ -32,7 +32,8 @@
 		"luacache": "luacache-logpagetext"
 	},
 	"LogActions": {
-		"luacache/apiwrite": "luacache-logentry-apiwrite"
+		"luacache/apiwrite": "luacache-logentry-apiwrite",
+		"luacache/preview": "luacache-logentry-preview"
 	},
 	"MessagesDirs": {
 		"LuaCache": [

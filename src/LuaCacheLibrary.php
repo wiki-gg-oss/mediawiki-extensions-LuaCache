@@ -80,16 +80,20 @@ class LuaCacheLibrary extends LibraryBase {
 		$reqContext = RequestContext::getMain();
 		$request = $reqContext->getRequest();
 
-		$action = strtolower( $request->getRawVal( 'action', '' ) );
+		// Edit previews should always be isolated
+		$isEditPreview = $this->getParserOptions()->getIsPreview();
+		if ( !$isEditPreview ) {
+			$action = strtolower( $request->getRawVal( 'action', '' ) );
+			// Check if always isolated
+			if ( in_array( $action, self::UNWRITABLE_ACTIONS ) ) {
+				return true;
+			}
+			// Check if this action is not protected
+			if ( !in_array( $action, self::PROTECTED_ACTIONS ) ) {
+				return false;
+			}
+		}
 
-		// Check if always isolated
-		if ( in_array( $action, self::UNWRITABLE_ACTIONS ) ) {
-			return true;
-		}
-		// Check if isolation can be bypassed
-		if ( !in_array( $action, self::PROTECTED_ACTIONS ) ) {
-			return false;
-		}
 		// Force isolation if the title does not exist
 		if ( !$this->getTitle()->exists() ) {
 			return false;
@@ -101,7 +105,7 @@ class LuaCacheLibrary extends LibraryBase {
 			if ( $lcLogApiWrites ) {
 				// Prepare info for the log entry that'll be created on the first write action
 				$this->logParams = [
-					'action' => 'apiwrite',
+					'action' => $isEditPreview ? 'preview' : 'apiwrite',
 					'identity' => $reqContext->getUser(),
 				];
 			}

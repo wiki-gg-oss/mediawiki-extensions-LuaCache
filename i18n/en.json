@@ -10,5 +10,6 @@
 	"luacache-logpage": "LuaCache API write log",
 	"luacache-logpagetext": "This is a log of all LuaCache writes that were executed by users through the MediaWiki API.",
 	"luacache-logentry-apiwrite": "modified object cache through the API on $1",
+	"luacache-logentry-preview": "modified object cache through an edit preview on $1",
 	"luacache-api-help-param-luacachewrite": "If true and the user has sufficient rights, LuaCache write actions will take an effect on the entire wiki."
 }
