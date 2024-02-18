@@ -83,6 +83,10 @@ class LuaCacheLibrary extends LibraryBase {
 		if ( !in_array( $action, self::PROTECTED_ACTIONS ) ) {
 			return false;
 		}
+		// Force isolation if the title does not exist
+		if ( !$this->getTitle()->exists() ) {
+			return false;
+		}
 
 		// Check if user requested an isolation bypass
 		$right = $request->getBool( 'lcwritable', false ) ? 'luacachecanexpand' : false;
