@@ -1,6 +1,6 @@
 ## LuaCache
 
-This extension exposes MediaWiki's ObjectCache through a Lua interface. You can use it to cache expensive values like the results of Cargo, SMW, or DPL queries for use across many pages of the wiki. Anything stored in the cache is available on *every* MediaWiki page, so in practice its use feels similar to SMW, but more performant.
+LuaCache exposes MediaWiki's ObjectCache through a Lua interface. You can use it to cache expensive values like the results of Cargo, SMW, or DPL queries for use across many pages of the wiki. Anything stored in the cache is available on *every* MediaWiki page, so in practice its use feels similar to SMW, but more performant.
 
 ### Installation
 * Extract the extension folder to extensions/LuaCache/
@@ -25,12 +25,12 @@ mw.ext.LuaCache.get( key )
 Because keys are **global**, you should **namespace** your variables. For example:
 
 ```lua
--- To totally nullify existing cache, increment `0`
+-- To totally nullify existing cache, increment `01`
 local luaCachePrefix = 'Users_01_'
 
 local p = {}
 function p.setUserValue(frame)
-   -- Store the 2nd arg into a key indicated by the first arg, prefixed by our namespace for user data
+   -- Set 2nd arg into a key indicated by the first arg, prefixed by our namespace for user data
    return mw.ext.LuaCache.set( luaCachePrefix .. frame.args[1], frame.args[2] )
 end
 
