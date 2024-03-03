@@ -40,6 +40,9 @@
 			"i18n"
 		]
 	},
+	"TrackingCategories": [
+		"luacache-tracking-category"
+	],
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\LuaCache\\": "src/"
 	},

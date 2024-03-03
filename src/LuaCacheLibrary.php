@@ -121,6 +121,10 @@ class LuaCacheLibrary extends LibraryBase {
 	}
 	
 	private function logWriteIfNeeded(): void {
+		if ( $this->getParser() !== null ) {
+			$this->getParser()->addTrackingCategory( 'luacache-tracking-category' );
+		}
+
 		if ( !$this->logParams ) {
 			return;
 		}
