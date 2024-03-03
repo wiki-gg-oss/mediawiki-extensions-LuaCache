@@ -1,6 +1,11 @@
 ## LuaCache
 
-LuaCache exposes MediaWiki's ObjectCache through a Lua interface. You can use it to cache expensive values like the results of Cargo, SMW, or DPL queries for use across many pages of the wiki. Anything stored in the cache is available on *every* MediaWiki page, so in practice its use feels similar to SMW, but more performant.
+LuaCache exposes MediaWiki's ObjectCache through a Lua interface. Anything stored in the cache is available on *every* MediaWiki page. There are two main reasons to use this extension:
+
+* Caching expensive Cargo/SMW/DPL results
+* Reducing the number of backlinks to a particular page, improving jobqueue performance
+
+While theoretically you could use LuaCache as a *substitute* for Cargo/SMW, this is not recommended; see Permissions below for more information.
 
 ### Installation
 * Extract the extension folder to extensions/LuaCache/
@@ -46,6 +51,29 @@ Unrestricted, you could overwrite LuaCache key-value pairs through previews or A
 However, you may need to write cache via the API in various scenarios like including a gadget to "commit" values from an updated data module. Thus, the user right `luacachecanexpand` is added, by default to all logged-in users. This right, along with the API parameter `luacachewrite` specified as true in the `expandtemplates` action, will enable the user to commit LuaCache data to the wiki. For high-traffic wikis it's recommended to consider restricting the right to the sysop group.
 
 By default any `expandtemplates` query that's permitted to write LuaCache keys will be logged in the `luacache` logs, regardless of whether any variables were changed. You can disable these logs via `$wgLuaCacheHideApiLogs`. By default, these logs are visible (not hidden). You can change this via `LuaCacheHideApiLogs`. It is recommended to hide/disable these logs **only** if `luacachecanexpand` is restricted to sysops, or if your wiki is private.
+
+#### Lua module best practices
+While it might be beneficial for testing, it's not recommended to write setter functions that can write arbitrary values, as this opens your wiki up to vandalism via injection into LuaCache.
+
+```lua
+local luaCachePrefix = 'Users_01_'
+
+local p = {}
+function p.setUserValueUnsafe(frame)
+   -- Don't do this
+   return mw.ext.LuaCache.set( luaCachePrefix .. frame.args[1], frame.args[2] )
+end
+
+function p.setUserValueSafe(frame)
+   -- Do this
+   local res = mw.ext.cargo.query('Users', "Name", { where = ("ID='%s'"):format(frame.args[1])})
+   return mw.ext.LuaCache.set( luaCachePrefix .. frame.args[1], res[1].Name )
+end
+
+return p
+```
+
+Keep in mind that vandalism will always be possible on a public wiki with unprotected pages, but these practices along with aggressive logging should make it possible to combat.
 
 ### Advanced usage
 
