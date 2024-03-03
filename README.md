@@ -45,12 +45,14 @@ function p.getUserValue(frame)
 end
 return p
 ```
-### Permissions
+### Permissions & tracking cache updates
 Unrestricted, you could overwrite LuaCache key-value pairs through previews or API actions `expandtemplates` or `parse`. This is not desirable, so LuaCache writes to a more temporary cache layer in every action other than a page save. LuaCache does not function in the Scribunto console.
 
 However, you may need to write cache via the API in various scenarios like including a gadget to "commit" values from an updated data module. Thus, the user right `luacachecanexpand` is added, by default to all logged-in users. This right, along with the API parameter `luacachewrite` specified as true in the `expandtemplates` action, will enable the user to commit LuaCache data to the wiki. For high-traffic wikis it's recommended to consider restricting the right to the sysop group.
 
 By default any `expandtemplates` query that's permitted to write LuaCache keys will be logged in the `luacache` logs, regardless of whether any variables were changed. You can disable these logs via `$wgLuaCacheHideApiLogs`. By default, these logs are visible (not hidden). You can change this via `LuaCacheHideApiLogs`. It is recommended to hide/disable these logs **only** if `luacachecanexpand` is restricted to sysops, or if your wiki is private.
+
+Finally, all pages setting LuaCache keys will be added to the category `[[Category:Pages setting LuaCache keys]]`. You can add `__HIDDENCAT__` to the category page for this category to suppress its visibility on content pages.
 
 #### Lua module best practices
 While it might be beneficial for testing, it's not recommended to write setter functions that can write arbitrary values, as this opens your wiki up to vandalism via injection into LuaCache.
