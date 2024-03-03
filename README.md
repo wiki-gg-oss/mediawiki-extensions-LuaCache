@@ -1,17 +1,53 @@
-LuaCache
-========
+## LuaCache
 
-This extension exposes MediaWiki's ObjectCache through a Lua interface.
+This extension exposes MediaWiki's ObjectCache through a Lua interface. You can use it to cache expensive values like the results of Cargo, SMW, or DPL queries for use across many pages of the wiki. Anything stored in the cache is available on *every* MediaWiki page, so in practice its use feels similar to SMW, but more performant.
 
-Installation
-============
+### Installation
 * Extract the extension folder to extensions/LuaCache/
 * Add the following line to LocalSettings.php:
 
 	wfLoadExtension( 'LuaCache' );
 
-Usage Example
-=============
+### Basic usage
+
+Store a value to cache:
+
+```lua
+mw.ext.LuaCache.set( key, value )
+```
+
+Read a value from cache:
+
+```lua
+mw.ext.LuaCache.get( key )
+```
+
+Because keys are **global**, you should **namespace** your variables. For example:
+
+```lua
+-- To totally nullify existing cache, increment `0`
+local luaCachePrefix = 'Users_01_'
+
+local p = {}
+function p.setUserValue(frame)
+   -- Store the 2nd arg into a key indicated by the first arg, prefixed by our namespace for user data
+   return mw.ext.LuaCache.set( luaCachePrefix .. frame.args[1], frame.args[2] )
+end
+
+function p.getUserValue(frame)
+   -- Get the value keyed by the first arg, and prefixed by our namespace for user data
+   return mw.ext.LuaCache.get( luaCachePrefix .. frame.args[1] )
+end
+return p
+```
+### Permissions
+Unrestricted, you could overwrite LuaCache key-value pairs through previews or API actions `expandtemplates` or `parse`. This is not desirable, so LuaCache writes to a more temporary cache layer in every action other than a page save. LuaCache does not function in the Scribunto console.
+
+However, you may need to write cache via the API in various scenarios like including a gadget to "commit" values from an updated data module. Thus, the user right `luacachecanexpand` is added, by default to all logged-in users. This right, along with the API parameter `luacachewrite` specified as true in the `expandtemplates` action, will enable the user to commit LuaCache data to the wiki. For high-traffic wikis it's recommended to consider restricting the right to the sysop group.
+
+By default any `expandtemplates` query that's permitted to write LuaCache keys will be logged in the `luacache` logs, regardless of whether any variables were changed. You can disable these logs via `$wgLuaCacheHideApiLogs`. By default, these logs are visible (not hidden). You can change this via `LuaCacheHideApiLogs`. It is recommended to hide/disable these logs **only** if `luacachecanexpand` is restricted to sysops, or if your wiki is private.
+
+### Advanced usage
 
 ```lua
 -- Module:Demo
