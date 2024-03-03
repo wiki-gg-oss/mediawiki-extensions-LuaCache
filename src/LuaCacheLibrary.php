@@ -47,6 +47,8 @@ class LuaCacheLibrary extends LibraryBase {
 		// Scribunto's interactive Lua console - there's no way to persist state between requests, and the console
 		// reevaluates all calls every request. Don't allow disabling isolation to allow log spam.
 		'scribunto-console',
+		// Edit stashing causes parses that can't be easily identified.
+		'stashedit',
 	];
 
 	/**
@@ -64,7 +66,7 @@ class LuaCacheLibrary extends LibraryBase {
 		parent::__construct( $engine );
 		$this->primaryCache = MediaWikiServices::getInstance()->getMainObjectStash();
 
-		if ( $this->checkActionSafeguards() ) {
+		if ( $this->getParser() !== null && $this->checkActionSafeguards() ) {
 			$this->memoryCache = new HashBagOStuff();
 		}
 	}
@@ -81,17 +83,20 @@ class LuaCacheLibrary extends LibraryBase {
 		$request = $reqContext->getRequest();
 
 		// Edit previews should always be isolated
-		$isEditPreview = $this->getParserOptions()->getIsPreview();
-		if ( !$isEditPreview ) {
-			$action = strtolower( $request->getRawVal( 'action', '' ) );
-			// Check if always isolated
-			if ( in_array( $action, self::UNWRITABLE_ACTIONS ) ) {
-				return true;
-			}
-			// Check if this action is not protected
-			if ( !in_array( $action, self::PROTECTED_ACTIONS ) ) {
-				return false;
-			}
+		$isEditPreview = $this->getParserOptions() !== null && $this->getParserOptions()->getIsPreview();
+
+		if ( $isEditPreview ) {
+			return true;
+		}
+
+		$action = strtolower( $request->getRawVal( 'action', '' ) );
+		// Check if always isolated
+		if ( in_array( $action, self::UNWRITABLE_ACTIONS ) ) {
+			return true;
+		}
+		// Check if this action is not protected
+		if ( !in_array( $action, self::PROTECTED_ACTIONS ) ) {
+			return false;
 		}
 
 		// Force isolation if the title does not exist
