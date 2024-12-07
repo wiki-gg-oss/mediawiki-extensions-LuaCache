@@ -2,7 +2,9 @@
 	"name": "LuaCache",
 	"version": "2.0.0",
 	"author": [
-		"Robert Nix"
+		"Robert Nix",
+		"wiki.gg development",
+		"alex4401 <alex@wiki.gg>"
 	],
 	"url": "https://gitlab.com/HydraWiki/extensions/LuaCache",
 	"descriptionmsg": "luacache-desc",
